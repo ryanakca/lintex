@@ -42,6 +42,7 @@
     1.05 - 2001-12-02 , linked list structure optimized.
     1.06 - 2002-09-25 , added .pdf extension.
            2010-07-11 , don't delete read only files
+           2010-07-14 , delete .bbl BibTeX files
 
   ---------------------------------------------------------------------*/
 
@@ -132,6 +133,7 @@ static Froot protoTree[] = {
   {".idx", 0, 0},
   {".ind", 0, 0},
   {".ilg", 0, 0},
+  {".bbl", 0, 0},
   {0, 0, 0}                              /* Must be last (sentinel) */
 };
 
