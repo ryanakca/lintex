@@ -7,6 +7,8 @@
  | WWW:    http://wwwcdf.pd.infn.it/~loreti/mlo.html    |
  *------------------------------------------------------*
 
+ Copyright (C) 2010 Ryan Kavanagh <ryanakca@kubuntu.org>
+
    $Id: lintex.c,v 1.6 2006/09/11 12:47:38 loreti Exp $
 
 
@@ -39,6 +41,7 @@
                         cleanup.
     1.05 - 2001-12-02 , linked list structure optimized.
     1.06 - 2002-09-25 , added .pdf extension.
+           2010-07-11 , don't delete read only files
 
   ---------------------------------------------------------------------*/
 
@@ -51,6 +54,7 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #include <sys/types.h>          /* Unix proper */
 #include <sys/stat.h>
@@ -93,6 +97,7 @@ typedef struct sFroot {
 typedef struct sFnode {
   time_t mTime;
   struct sFnode *next;
+  int write;
   char name[1];
 } Fnode;
 
@@ -138,7 +143,7 @@ static char  *baseName(char *);
 static Froot *buildTree(char *, Froot *);
 static void   clean(char *);
 static void   examineTree(Froot *, char *);
-static void   insertNode(char *, size_t, time_t, Froot *);
+static void   insertNode(char *, size_t, time_t, int, Froot *);
 static void   noMemory(void);
 static void   nuke(char *);
 static void   releaseTree(Froot *);
@@ -196,7 +201,7 @@ int main(
         strcpy(bExt, *argv);
         to_bExt = FALSE;
       } else {
-        insertNode(*argv, 0, 0, dirNames);
+        insertNode(*argv, 0, 0, 0, dirNames);
       }
     }
   }
@@ -231,6 +236,7 @@ static void insertNode(
   char   *name,
   size_t  lName,
   time_t  mTime,
+  int write,
   Froot  *root
 ){
 
@@ -253,6 +259,7 @@ static void insertNode(
     noMemory();
   }
   pFN->mTime = mTime;
+  pFN->write = write;
   pFN->next  = 0;
 
   if (lName == 0) {
@@ -403,7 +410,7 @@ static Froot *buildTree(
 #endif   /* FULLDEBUG */
 
       if (recurse) {
-        insertNode(tName, 0, 0, subDirs);
+        insertNode(tName, 0, 0, 0, subDirs);
       }
       continue;
     }
@@ -433,7 +440,7 @@ static Froot *buildTree(
 
         for (pTT = teXTree;   pTT->extension != 0;   pTT++) {
           if (strcmp(pFe, pTT->extension) == 0) {
-            insertNode(pDe->d_name, nameLen, sStat.st_mtime, pTT);
+            insertNode(pDe->d_name, nameLen, sStat.st_mtime, access(tName, W_OK), pTT);
 
 #ifdef FULLDEBUG
             printf(" - inserted in tree");
@@ -536,7 +543,14 @@ static void examineTree(
           pComp->name[0] = '\0';
 
           if (difftime(pComp->mTime, pTeX->mTime) > 0.0) {
-            nuke(cName);
+            if (pComp->write == 0) {
+              nuke(cName);
+            } else {
+#ifdef FULLDEBUG
+              printf("*** %s readonly; perms are %d***\n", cName, pComp->write);
+#endif    /* FULLDEBUG */
+              printf("*** %s not removed; it is read only ***\n", cName);
+            }
           } else {
             printf("*** %s not removed; %s is newer ***\n", cName, tName);
           }
