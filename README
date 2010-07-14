@@ -1,0 +1,93 @@
+"lintex" is a C program that removes auxilliary (La)TeX files that are
+usually not needed after a (La)TeX run (log, aux, dvi, ... files);
+they are however actually removed only if their modification time is
+more recent than the one of the related TeX source.  The backup files
+usually created by many editors are also removed.
+
+"lintex" has been developed in an Unix environment, specifically under
+Solaris 2; but should run on every Unix system supporting opendir,
+readdir, closedir and lstat library calls.  A command file used under
+VMS to achieve the same results, LINTEX.COM, is also encluded; note
+however that it does not have all the functionalities of the C
+program.  Under VMS you may define a VMS external command like:
+
+                $ LINTEX :== @DISK:[DIRECTORY]LINTEX
+
+A man file and a Makefile are included; examine the Makefile (a few
+lines only), modify it if needed, then type "make" and (with root
+privileges if the target directory is protected) "make install".
+
+"lintex" is released under the GNU Public License agreement; enjoy!
+Here follows an example run:
+
+MLO@cmssun2 38 $ lintex -h
+Usage:
+  lintex [-i] [-r] [-b ext] [dir [dir ... ]]
+Purpose:
+  removes unneeded TeX auxilliary files and editor backup files from the
+  given directories (default: the current directory); the TeX files are
+  actually removed only if their modification time is more recent than
+  the one of the related TeX source.
+Options:
+  -i : asks the user before removing any file;
+  -r : scans recursively the subdirectories of the given directories;
+  -b : "ext" is the trailing string identifying editor backup files
+       (defaults to "~").  -b "" avoids any cleanup of special files.
+MLO@cmssun2 39 $ ls -lR
+total 336
+-rw-r--r--   1 loreti   g1cdf          20 Jun 18 14:15 README
+-rw-r--r--   1 loreti   g1cdf        2863 Jun 18 14:20 command.aux
+-rw-r--r--   1 loreti   g1cdf       13864 Jun 18 14:20 command.dvi
+-rw-r--r--   1 loreti   g1cdf       18075 Jun 18 14:20 command.log
+-rw-r--r--   1 loreti   g1cdf       89960 Jun 18 14:20 command.ps
+-rw-r--r--   1 loreti   g1cdf       11411 Jun 18 14:15 command.tex
+-rw-r--r--   1 loreti   g1cdf       10267 Jun 18 14:20 millim.ps
+-rw-r--r--   1 loreti   g1cdf        3431 Jun 18 14:19 tao.aux
+-rw-r--r--   1 loreti   g1cdf       27524 Jun 18 14:19 tao.dvi
+-rw-r--r--   1 loreti   g1cdf       13465 Jun 18 14:19 tao.log
+-rw-r--r--   1 loreti   g1cdf      113827 Jun 18 14:19 tao.ps
+-rw-r--r--   1 loreti   g1cdf       21776 Jun 18 14:15 tao.tex
+-rw-r--r--   1 loreti   g1cdf        2001 Jun 18 14:19 tao.toc
+drwxr-xr-x   2 loreti   g1cdf         512 Jun 18 14:19 tex1
+ 
+tex1:
+total 73
+-rw-r--r--   1 loreti   g1cdf        2079 Jun 18 14:17 maria.log
+-rw-r--r--   1 loreti   g1cdf       23250 Jun 18 14:19 maria.tex
+-rw-r--r--   1 loreti   g1cdf         166 Jun 18 14:19 prog.aux
+-rw-r--r--   1 loreti   g1cdf        6304 Jun 18 14:19 prog.dvi
+-rw-r--r--   1 loreti   g1cdf        3182 Jun 18 14:19 prog.log
+-rw-r--r--   1 loreti   g1cdf       28974 Jun 18 14:19 prog.ps
+-rw-r--r--   1 loreti   g1cdf        5545 Jun 18 14:18 prog.tex
+-rw-r--r--   1 loreti   g1cdf        5532 Jun 18 14:15 prog.tex~
+MLO@cmssun2 40 $ lintex -r README .
+lintex: "README" cannot be opened (or is not a directory)
+./tex1/prog.dvi has been removed
+./tex1/prog.aux has been removed
+./tex1/prog.log has been removed
+./tex1/prog.ps has been removed
+./tex1/prog.tex~ has been removed
+*** ./tex1/maria.log not removed; ./tex1/maria.tex is newer ***
+./command.dvi has been removed
+./command.aux has been removed
+./command.log has been removed
+./command.ps has been removed
+./tao.dvi has been removed
+./tao.aux has been removed
+./tao.toc has been removed
+./tao.log has been removed
+./tao.ps has been removed
+*** ./millim.ps not removed; no .tex file found ***
+MLO@cmssun2 41 $ ls -lR
+total 46
+-rw-r--r--   1 loreti   g1cdf           0 Jun 18 14:15 README
+-rw-r--r--   1 loreti   g1cdf       11411 Jun 18 14:15 command.tex
+-rw-r--r--   1 loreti   g1cdf       10267 Jun 18 14:20 millim.ps
+-rw-r--r--   1 loreti   g1cdf       21776 Jun 18 14:15 tao.tex
+drwxr-xr-x   2 loreti   g1cdf         512 Jun 18 14:22 tex1
+ 
+tex1:
+total 32
+-rw-r--r--   1 loreti   g1cdf        2079 Jun 18 14:17 maria.log
+-rw-r--r--   1 loreti   g1cdf       23250 Jun 18 14:19 maria.tex
+-rw-r--r--   1 loreti   g1cdf        5545 Jun 18 14:18 prog.tex
