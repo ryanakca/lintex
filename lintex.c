@@ -355,9 +355,9 @@ static Froot *buildTree(
   Froot         *teXTree;      /* Root node of the TeX-related files */
 
 #ifdef FULLDEBUG
-  printf("* Scanning directory \"%s\" - confirm = %c, recurse = %c\n",
+  printf("* Scanning directory \"%s\" - confirm = %c, recurse = %c, ",
          dirName, (confirm ? 'Y' : 'N'), (recurse ? 'Y' : 'N'));
-  printf("* Keep generated document %c\n", (keep ? 'Y' : 'N'));
+  printf("keep = %c\n", (keep ? 'Y' : 'N'));
   printf("* Editor trailer: \"%s\"\n", bExt);
   puts("------------------------------Phase 1: directory scan");
 #endif   /* FULLDEBUG */
@@ -487,19 +487,25 @@ static Froot *buildTree(
                 insertNode(pDe->d_name, nameLen, sStat.st_mtime,
                            access(tName, W_OK), pTT);
 #ifdef FULLDEBUG
+                printf(" - inserted in tree");
+#endif   /* FULLDEBUG */
               } else {
-                printf("File %s - keep final document with extension %s\n",
-                        pDe->d_name, pTT->extension);
-#endif
+                /* This is a final TeX document. Let me know when debugging. */
+#ifdef FULLDEBUG
+                printf(" - not inserted in tree (keep enabled)\n");
+#endif   /* FULLDEBUG */
               }
             } else {
+              /**
+               | We don't want to keep final documents. Add it to the list of
+               | files to remove.
+              **/
               insertNode(pDe->d_name, nameLen, sStat.st_mtime,
                          access(tName, W_OK), pTT);
-            }
-
 #ifdef FULLDEBUG
-            printf(" - inserted in tree");
+              printf(" - inserted in tree");
 #endif   /* FULLDEBUG */
+            }
             break;
           }
         } /* loop on known extensions */
