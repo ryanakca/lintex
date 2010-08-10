@@ -43,6 +43,7 @@
     1.06 - 2002-09-25 , added .pdf extension.
            2010-07-11 , don't delete read only files
            2010-07-14 , delete .bbl BibTeX files
+           2010-08-10 , add -k to keep final product
 
   ---------------------------------------------------------------------*/
 
@@ -739,7 +740,7 @@ static char *baseName(
 static void syntax()
 {
   puts("Usage:");
-  printf("  %s [-i] [-r] [-b ext] [dir [dir ... ]]\n", programName);
+  printf("  %s [-i] [-r] [-b ext] [-k] [dir [dir ... ]]\n", programName);
   puts("Purpose:");
   puts("  removes unneeded TeX auxiliary files and editor backup files from"
        " the");
@@ -747,7 +748,7 @@ static void syntax()
        " are");
   puts("  actually removed only if their modification time is more recent"
        " than");
-  puts("  the one of the related TeX source.");
+  puts("  the one of the related TeX source and if they aren't readonly.");
   puts("Options:");
   puts("  -i : asks the user before removing any file;");
   puts("  -r : scans recursively the subdirectories of the given"
@@ -756,6 +757,7 @@ static void syntax()
        " files");
   puts("       (defaults to \"~\").  -b \"\" avoids any cleanup of special"
        " files.");
+  puts("  -k : keeps final document (.pdf, .ps, .dvi)");
 
   exit(EXIT_SUCCESS);
 }
