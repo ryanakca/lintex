@@ -11,19 +11,20 @@
 .ie \\n(.$=0:((0\\$1)*2u>(\\n(.lu-\\n(.iu)) .TP
 .el .TP "\\$1"
 ..
-.TH lintex 1 "25 June 2002" "lintex version 1.06"
+.TH lintex 1 "10 August 2010" "lintex version 1.07"
 .SH NAME
 lintex \- removes TeX-related garbage files
 .SH SYNOPSIS
-.BR lintex " [ " "\-i" " ] [ " "\-r" " ] [ " "\-b ext" " ]"
+.BR lintex " [ " "\-i" " ] [ " "\-r" " ] [ " "\-b ext" " ] [ " "\-k" " ]"
 .RI " [ " dir  " [ " dir " \|.\|.\|.\| ]]"
 .SH DESCRIPTION
 .B lintex
 is a program that removes TeX-related auxiliary files, normally not
 needed after a successful TeX run (i.e. log, aux, dvi, \.\.\. files);
 they are actually removed only if their modification timestamp is more
-recent than the one of the related TeX source.  In addition, all the
-backup files that your favorite editor has generated are also removed.
+recent than the one of the related TeX source and if they aren't readonly.
+In addition, all the backup files that your favorite editor has generated
+are also removed.
 .SH OPTIONS
 .TP
 .B \-i
@@ -50,6 +51,9 @@ enclosed in quotes: e.g.
 (equivalent to the default).  Specifying the null string, as in
 .BR "\-b """"" ","
 inhibits the cleanup of any special file.
+.TP
+.B \-k
+Keeps final documents (.pdf, .ps, .dvi)
 .SH PARAMETERS
 .TP
 .SM
@@ -57,9 +61,19 @@ inhibits the cleanup of any special file.
 The name(s), separated by whitespace, of one or more directories to be
 cleaned; if missing, the default is the current directory.
 .SH AUTHOR
-Maurizio Loreti <loreti@pd.infn.it>; feel free to EMail your comments,
-suggestions and improvements (also about the bad English :-).
+lintex was written by Maurizio Loreti <Maurizio_Loreti\@gmail.com> between 1996
+and 2002.
+
+As of 2010, lintex is maintained by Ryan Kavanagh <ryanakca\@kubuntu.org>. It
+features several extensions/bug fixes. Feel free to email him with your comments
+and suggestions.
+
 .SH COPYRIGHT
+
+Copyright \[co] 1996\(en2002 Maurizio Loreti <Maurizio_Loreti\@gmail.com>
+
+Copyright \[co] 2010      Ryan Kavanagh <ryanakca\@kubuntu.org>
+
 .B lintex
 is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free
