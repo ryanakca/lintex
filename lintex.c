@@ -106,16 +106,20 @@ typedef struct sFnode {
  | Global variables:
  | - confirm: will be 0 or 1 according to the -i command option;
  | - recurse: will be 0 or 1 according to the -r command option;
+ | - keep: will be 0 or 1 according to the -k command option;
  | - bExt: the extension for backup files: defaults to "~" (the emacs
  |   convention);
  | - n_bExt: the length of the previous string;
  | - programName: the name of the executable;
  | - protoTree: Froot's of the file names having extensions relevant to
  |   TeX.  ".tex" extensions are assumed to be pointed to by protoTree[0].
+ | - keepTree: Froot's of the file names having extensions relevant to final
+ |   generated documents.
 **/
 
 static int     confirm         = FALSE;
 static int     recurse         = FALSE;
+static int     keep            = FALSE;
 static char    bExt[MAX_B_EXT] = "~";
 static size_t  n_bExt;
 static char   *programName;
@@ -135,6 +139,13 @@ static Froot protoTree[] = {
   {".ilg", 0, 0},
   {".bbl", 0, 0},
   {0, 0, 0}                              /* Must be last (sentinel) */
+};
+
+static Froot keepTree[] = {
+  {".pdf", 0, 0},
+  {".ps",  0, 0},
+  {".dvi", 0, 0},
+  {0, 0, 0}
 };
 
 /**
@@ -188,6 +199,10 @@ int main(
 
         case 'r':   case 'R':
           recurse = TRUE;
+          break;
+
+        case 'k':   case 'K':
+          keep = TRUE;
           break;
 
         case 'b':   case 'B':
@@ -342,6 +357,7 @@ static Froot *buildTree(
 #ifdef FULLDEBUG
   printf("* Scanning directory \"%s\" - confirm = %c, recurse = %c\n",
          dirName, (confirm ? 'Y' : 'N'), (recurse ? 'Y' : 'N'));
+  printf("* Keep generated document %c\n", (keep ? 'Y' : 'N'));
   printf("* Editor trailer: \"%s\"\n", bExt);
   puts("------------------------------Phase 1: directory scan");
 #endif   /* FULLDEBUG */
@@ -423,6 +439,9 @@ static Froot *buildTree(
      | entries in teXTree[i].extension: stores the file name (with the
      | extension stripped) in the appropriate linked list, together with
      | its modification time.
+     |
+     | Exception: A file is not added to teXTree if the keep option is
+     | enabled and if the extension is in the list of extensions to keep.
     **/
 
     if ((pFe = strrchr(pDe->d_name, '.')) != 0) {
@@ -441,8 +460,42 @@ static Froot *buildTree(
         **/
 
         for (pTT = teXTree;   pTT->extension != 0;   pTT++) {
-          if (strcmp(pFe, pTT->extension) == 0) {
-            insertNode(pDe->d_name, nameLen, sStat.st_mtime, access(tName, W_OK), pTT);
+          if ((strcmp(pFe, pTT->extension) == 0)) {
+            /* Do we want to keep final product? */
+            if (keep) {
+              /* kExt will contain the extensions we want to keep */
+              Froot *kExt;
+              /**
+               | Loop on recognized TeX-related document extensions
+               | to make sure we aren't deleting a document we want
+               | to keep.
+               |
+               | Surely there's a more elegant way?
+              **/
+              int guard = 1;
+              for (kExt = keepTree; kExt->extension != 0; kExt++) {
+                if ((strcmp(kExt->extension, pTT->extension) == 0)) {
+                  guard = 0;
+                  break;
+                }
+              }
+              if (guard) {
+                /**
+                 | This is not a final TeX document. Let's add it to the list
+                 | of files to remove.
+                **/
+                insertNode(pDe->d_name, nameLen, sStat.st_mtime,
+                           access(tName, W_OK), pTT);
+#ifdef FULLDEBUG
+              } else {
+                printf("File %s - keep final document with extension %s\n",
+                        pDe->d_name, pTT->extension);
+#endif
+              }
+            } else {
+              insertNode(pDe->d_name, nameLen, sStat.st_mtime,
+                         access(tName, W_OK), pTT);
+            }
 
 #ifdef FULLDEBUG
             printf(" - inserted in tree");
