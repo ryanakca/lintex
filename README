@@ -21,8 +21,9 @@ privileges if the target directory is protected) "make install".
 Here follows an example run:
 
 MLO@cmssun2 38 $ lintex -h
+lintex version 1.06
 Usage:
-  lintex [-i] [-r] [-b ext] [dir [dir ... ]]
+  lintex [-i] [-r] [-b ext] [-k] [dir [dir ... ]]
 Purpose:
   removes unneeded TeX auxilliary files and editor backup files from the
   given directories (default: the current directory); the TeX files are
@@ -33,6 +34,7 @@ Options:
   -r : scans recursively the subdirectories of the given directories;
   -b : "ext" is the trailing string identifying editor backup files
        (defaults to "~").  -b "" avoids any cleanup of special files.
+  -k : keeps final document (.pdf, .ps, .dvi)
 MLO@cmssun2 39 $ ls -lR
 total 336
 -rw-r--r--   1 loreti   g1cdf          20 Jun 18 14:15 README
