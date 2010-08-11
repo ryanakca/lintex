@@ -448,9 +448,6 @@ static Froot *buildTree(
      | entries in teXTree[i].extension: stores the file name (with the
      | extension stripped) in the appropriate linked list, together with
      | its modification time.
-     |
-     | Exception: A file is not added to teXTree if the keep option is
-     | enabled and if the extension is in the list of extensions to keep.
     **/
 
     if ((pFe = strrchr(pDe->d_name, '.')) != 0) {
@@ -469,52 +466,12 @@ static Froot *buildTree(
         **/
 
         for (pTT = teXTree;   pTT->extension != 0;   pTT++) {
-          if ((strcmp(pFe, pTT->extension) == 0)) {
-            /* Do we want to keep final product? */
-            if (keep) {
-              /* kExt will contain the extensions we want to keep */
-              Froot *kExt;
-              /**
-               | Loop on recognized TeX-related document extensions
-               | to make sure we aren't deleting a document we want
-               | to keep.
-               |
-               | Surely there's a more elegant way?
-              **/
-              int guard = 1;
-              for (kExt = keepTree; kExt->extension != 0; kExt++) {
-                if ((strcmp(kExt->extension, pTT->extension) == 0)) {
-                  guard = 0;
-                  break;
-                }
-              }
-              if (guard) {
-                /**
-                 | This is not a final TeX document. Let's add it to the list
-                 | of files to remove.
-                **/
-                insertNode(pDe->d_name, nameLen, sStat.st_mtime,
-                           access(tName, W_OK), pTT);
+          if (strcmp(pFe, pTT->extension) == 0) {
+            insertNode(pDe->d_name, nameLen, sStat.st_mtime, access(tName, W_OK), pTT);
+
 #ifdef FULLDEBUG
-                printf(" - inserted in tree");
+            printf(" - inserted in tree");
 #endif   /* FULLDEBUG */
-              } else {
-                /* This is a final TeX document. Let me know when debugging. */
-#ifdef FULLDEBUG
-                printf(" - not inserted in tree (keep enabled)\n");
-#endif   /* FULLDEBUG */
-              }
-            } else {
-              /**
-               | We don't want to keep final documents. Add it to the list of
-               | files to remove.
-              **/
-              insertNode(pDe->d_name, nameLen, sStat.st_mtime,
-                         access(tName, W_OK), pTT);
-#ifdef FULLDEBUG
-              printf(" - inserted in tree");
-#endif   /* FULLDEBUG */
-            }
             break;
           }
         } /* loop on known extensions */
@@ -614,7 +571,34 @@ static void examineTree(
 
           if (difftime(pComp->mTime, pTeX->mTime) > 0.0) {
             if (pComp->write == 0) {
-              nuke(cName);
+              if (keep) {
+                Froot *kExt;
+                /**
+                 | Loop on recognized TeX-related document extensions
+                 | to make sure we aren't deleting a document we want
+                 | to keep.
+                 |
+                 | Surely there's a more elegant way?
+                **/
+                int guard = 1;
+                for (kExt = keepTree; kExt->extension != 0; kExt++) {
+                  if ((strcmp(kExt->extension, pTT->extension) == 0)) {
+                    guard = 0;
+                    break;
+                  }
+                }
+                if (guard) {
+                  /**
+                   | This is not a final TeX document. We can delete it
+                  **/
+                  nuke(cName);
+                } else {
+                  printf("*** %s not removed; keep is enabled ***\n", cName);
+                }
+              } else {
+                /* We don't care to keep final documents */
+                nuke(cName);
+              }
             } else {
 #ifdef FULLDEBUG
               printf("*** %s readonly; perms are %d***\n", cName, pComp->write);
