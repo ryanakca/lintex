@@ -9,6 +9,9 @@
 
  Copyright (C) 2010 Ryan Kavanagh <ryanakca@kubuntu.org>
 
+ The lintex website now resides at:
+   http://github.com/ryanakca/lintex
+
    $Id: lintex.c,v 1.6 2006/09/11 12:47:38 loreti Exp $
 
 
