@@ -73,12 +73,14 @@
  | - MAX_B_EXT: maximum length of the extension for backup files (including
  |   the leading dot and the trailing '\0').
  | - TRUE, FALSE: guess what?
+ | - VERSION: lintex version
 **/
 
 #define LONG_ENOUGH 48
 #define MAX_B_EXT    8
 #define TRUE         1
 #define FALSE        0
+#define VERSION    "1.06"
 
 /**
  | Type definitions:
@@ -731,6 +733,7 @@ static char *baseName(
 
 static void syntax()
 {
+  printf("lintex version %s\n", VERSION);
   puts("Usage:");
   printf("  %s [-i] [-r] [-b ext] [-k] [dir [dir ... ]]\n", programName);
   puts("Purpose:");
