@@ -71,6 +71,14 @@
  |   the leading dot and the trailing '\0').
  | - TRUE, FALSE: guess what?
  | - VERSION: lintex version
+ | - QUIET, WHISPER, VERBOSE and DEBUG:
+ |    * QUIET: no output
+ |    * WHISPER: only print actions that are taken (ie. list files that are
+ |      removed, default starting as of 1.08)
+ |    * VERBOSE: list files on which actions are taken as well as those which
+ |      aren't (default up to / including 1.07)
+ |    * DEDUG: print debug information (originally FULLDEBUG in the Makefile)
+ |      means print everything you can for those who want to debug.
 **/
 
 #define LONG_ENOUGH 48
@@ -78,6 +86,10 @@
 #define TRUE         1
 #define FALSE        0
 #define VERSION    "1.07 (2010-08-11)"
+#define QUIET        0
+#define WHISPER      1
+#define VERBOSE      2
+#define DEBUG        3
 
 /**
  | Type definitions:
@@ -111,6 +123,7 @@ typedef struct sFnode {
  | - confirm: will be 0 or 1 according to the -i command option;
  | - recurse: will be 0 or 1 according to the -r command option;
  | - keep: will be 0 or 1 according to the -k command option;
+ | - output_level: See the definitions above for more details;
  | - bExt: the extension for backup files: defaults to "~" (the emacs
  |   convention);
  | - n_bExt: the length of the previous string;
@@ -124,6 +137,7 @@ typedef struct sFnode {
 static int     confirm         = FALSE;
 static int     recurse         = FALSE;
 static int     keep            = FALSE;
+static int     output_level    = WHISPER;
 static char    bExt[MAX_B_EXT] = "~";
 static size_t  n_bExt;
 static char   *programName;
@@ -215,6 +229,18 @@ int main(
 
         case 'b':   case 'B':
           to_bExt = TRUE;
+          break;
+
+        case 'q':   case 'Q':
+          output_level = QUIET;
+          break;
+
+        case 'v':   case 'V':
+          output_level = VERBOSE;
+          break;
+
+        case 'd':   case 'D':
+          output_level = DEBUG;
           break;
 
         default:
