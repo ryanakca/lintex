@@ -26,9 +26,6 @@
     are assumed to be null terminated (this is guaranteed under Solaris
     2).
 
-  Compiler flags: -DDEBUG to list remove commands without their actual
-    execution; -DFULLDEBUG for the above and a lot of printouts.
-
   History:
     1.00 - 1996-07-05 , first release
     1.01 - 1996-07-25 , improved (modify time in nodes)
