@@ -15,7 +15,8 @@
 .SH NAME
 lintex \- removes TeX-related garbage files
 .SH SYNOPSIS
-.BR lintex " [ " "\-i" " ] [ " "\-r" " ] [ " "\-b ext" " ] [ " "\-k" " ]"
+.BR lintex " [ " "\-i" " ] [ " "\-r" " ] [ " "\-b ext" " ] [ " "\-p" " ]"
+.RB " [ " "\-k" " ] [ " "\-q" " ] [ " "\-v" " ] [ " "\-d" " ]"
 .RI " [ " dir  " [ " dir " \|.\|.\|.\| ]]"
 .SH DESCRIPTION
 .B lintex
@@ -52,8 +53,20 @@ enclosed in quotes: e.g.
 .BR "\-b """"" ","
 inhibits the cleanup of any special file.
 .TP
+.B \-p
+Pretends, show what files would be removed but don't actually remove them.
+.TP
 .B \-k
-Keeps final documents (.pdf, .ps, .dvi)
+Keeps final documents (.pdf, .ps, .dvi).
+.TP
+.B \-q
+Quiet, only prints error messages.
+.TP
+.B \-v
+Verbose, prints which files were removed and which weren't.
+.TP
+.B \-d
+Debug, prints the answers to all of life's questions.
 .SH PARAMETERS
 .TP
 .SM
