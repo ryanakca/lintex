@@ -181,6 +181,7 @@ static void   examineTree(Froot *, char *);
 static void   insertNode(char *, size_t, time_t, int, Froot *);
 static void   noMemory(void);
 static void   nuke(char *);
+static void   printMessage(char *, int);
 static void   releaseTree(Froot *);
 static void   syntax(void);
 
@@ -752,6 +753,15 @@ static char *baseName(
   p = strrchr(pc, '/');
   if (p == 0) return pc;
   return ++p;
+}
+
+static void printMessage(
+  char *message,
+  int  message_level
+){
+  if (message_level <= output_level) {
+    puts(message);
+  }
 }
 
 static void syntax()
