@@ -74,8 +74,9 @@
  |      removed, default starting as of 1.08)
  |    * VERBOSE: list files on which actions are taken as well as those which
  |      aren't (default up to / including 1.07)
- |    * DEDUG: print debug information (originally FULLDEBUG in the Makefile)
+ |    * DEDUG: print debug information (originally FULLDEBUG compiler flag)
  |      means print everything you can for those who want to debug.
+ |   Errors will be sent to stderr regardless of the output level.
 **/
 
 #define LONG_ENOUGH 48
@@ -178,13 +179,10 @@ static void   examineTree(Froot *, char *);
 static void   insertNode(char *, size_t, time_t, int, Froot *);
 static void   noMemory(void);
 static void   nuke(char *);
-static void   printMessage(char *, int);
+static void   putsMessage(char *, int);
+static void   printTree(Froot *);
 static void   releaseTree(Froot *);
 static void   syntax(void);
-
-#ifdef FULLDEBUG
-static void   printTree(Froot *);
-#endif   /* FULLDEBUG */
 
 /*---------------------------*
  | And now, our main program |
@@ -356,9 +354,9 @@ static void clean(
 
   if ((teXTree = buildTree(dirName, dirs)) != 0) {
 
-#ifdef FULLDEBUG
-    printTree(teXTree);
-#endif   /* FULLDEBUG */
+    if (output_level >= DEBUG) {
+      printTree(teXTree);
+    }
 
     examineTree(teXTree, dirName);
     releaseTree(teXTree);
@@ -386,13 +384,13 @@ static Froot *buildTree(
   struct dirent *pDe;          /* Pointer returned from readdir()    */
   Froot         *teXTree;      /* Root node of the TeX-related files */
 
-#ifdef FULLDEBUG
-  printf("* Scanning directory \"%s\" - confirm = %c, recurse = %c, ",
-         dirName, (confirm ? 'Y' : 'N'), (recurse ? 'Y' : 'N'));
-  printf("keep = %c\n", (keep ? 'Y' : 'N'));
-  printf("* Editor trailer: \"%s\"\n", bExt);
-  puts("------------------------------Phase 1: directory scan");
-#endif   /* FULLDEBUG */
+  if (output_level >= DEBUG) {
+    printf("* Scanning directory \"%s\" - confirm = %c, recurse = %c, ",
+         dirName, (confirm ? 'Y' : 'N'), (recurse ? 'Y' : 'N')),
+    printf("keep = %c\n", (keep ? 'Y' : 'N'));
+    printf("* Editor trailer: \"%s\"\n", bExt);
+    puts("------------------------------Phase 1: directory scan");
+  }
 
   if ((pDir = opendir(dirName)) == 0) {
     fprintf(stderr,
@@ -455,9 +453,9 @@ static Froot *buildTree(
 
     if (S_ISDIR(sStat.st_mode) != 0) {
 
-#ifdef FULLDEBUG
-      printf("File %s - is a directory\n", pDe->d_name);
-#endif   /* FULLDEBUG */
+      if (output_level >= DEBUG) {
+        printf("File %s - is a directory\n", pDe->d_name);
+      }
 
       if (recurse) {
         insertNode(tName, 0, 0, 0, subDirs);
@@ -480,9 +478,9 @@ static Froot *buildTree(
       if (nameLen < last) {
         Froot *pTT;
 
-#ifdef FULLDEBUG
-        printf("File %s - extension %s", pDe->d_name, pFe);
-#endif   /* FULLDEBUG */
+        if (output_level >= DEBUG) {
+          printf("File %s - extension %s", pDe->d_name, pFe);
+        }
 
         /**
          | Loop on recognized TeX-related file extensions
@@ -492,25 +490,27 @@ static Froot *buildTree(
           if (strcmp(pFe, pTT->extension) == 0) {
             insertNode(pDe->d_name, nameLen, sStat.st_mtime, access(tName, W_OK), pTT);
 
-#ifdef FULLDEBUG
-            printf(" - inserted in tree");
-#endif   /* FULLDEBUG */
+            if (output_level >= DEBUG) {
+              printf(" - inserted in tree");
+            }
             break;
           }
         } /* loop on known extensions */
 
-#ifdef FULLDEBUG
-        puts("");
+        if (output_level >= DEBUG) {
+          puts("");
+        }
 
       } else {
-        printf("File %s - empty extension\n", pDe->d_name);
-#endif   /* FULLDEBUG */
+        if (output_level >= VERBOSE) {
+          printf("File %s - empty extension\n", pDe->d_name);
+        }
       }
 
-#ifdef FULLDEBUG
     } else {
-      printf("File %s - without extension\n", pDe->d_name);
-#endif   /* FULLDEBUG */
+      if (output_level >= DEBUG) {
+        printf("File %s - without extension\n", pDe->d_name);
+      }
     }
   }             /* while (readdir) ... */
 
@@ -522,7 +522,6 @@ static Froot *buildTree(
   return teXTree;
 }
 
-#ifdef FULLDEBUG
 static void printTree(
   Froot *teXTree
 ){
@@ -532,22 +531,23 @@ static void printTree(
    | debugging purposes).
   **/
 
-  Froot *pTT;           /* Running pointer over teXTree elements */
+  if (output_level >= DEBUG) {
+    Froot *pTT;           /* Running pointer over teXTree elements */
 
-  puts("------------------------------Phase 2: tree printout");
-  for (pTT = teXTree;   pTT->extension != 0;   pTT++) {
-    Fnode *pTeX;              /* Running pointer over TeX-related files */
-    int    nNodes = 0;        /* Counter */
+    puts("------------------------------Phase 2: tree printout");;
+    for (pTT = teXTree;   pTT->extension != 0;   pTT++) {
+      Fnode *pTeX;              /* Running pointer over TeX-related files */
+      int    nNodes = 0;        /* Counter */
 
-    for (pTeX = pTT->firstNode;   pTeX != 0;   pTeX = pTeX->next) {
-      ++nNodes;
-      printf("%s%s\n", pTeX->name, pTT->extension);
+      for (pTeX = pTT->firstNode;   pTeX != 0;   pTeX = pTeX->next) {
+        ++nNodes;
+        printf("%s%s\n", pTeX->name, pTT->extension);
+      }
+      printf("  --> %d file%s with extension %s\n", nNodes,
+             (nNodes == 1 ? "" : "s"), pTT->extension);
     }
-    printf("  --> %d file%s with extension %s\n", nNodes,
-           (nNodes == 1 ? "" : "s"), pTT->extension);
   }
 }
-#endif   /* FULLDEBUG */
 
 static void examineTree(
   Froot *teXTree,
@@ -568,9 +568,8 @@ static void examineTree(
    | and if its modification time is later than the one of the related
    | .tex file, removes it from the file system.
   **/
-#ifdef FULLDEBUG
-  puts("------------------------------Phase 3: effective cleanup");
-#endif   /* FULLDEBUG */
+  putsMessage("------------------------------Phase 3: effective cleanup",
+              DEBUG);
 
   for (pTeX = teXTree->firstNode;   pTeX != 0;   pTeX = pTeX->next) {
     char tName[FILENAME_MAX];
@@ -578,9 +577,9 @@ static void examineTree(
     sprintf(tName, "%s/%s.tex", dirName, pTeX->name);
     pTT = teXTree;
 
-#ifdef FULLDEBUG
-    printf("    Finding files related to %s:\n", tName);
-#endif   /* FULLDEBUG */
+    if (output_level >= DEBUG) {
+      printf("    Finding files related to %s:\n", tName);
+    }
 
     for (pTT++;   pTT->extension != 0;   pTT++) {
       Fnode *pComp;
@@ -623,13 +622,18 @@ static void examineTree(
                 nuke(cName);
               }
             } else {
-#ifdef FULLDEBUG
-              printf("*** %s readonly; perms are %d***\n", cName, pComp->write);
-#endif    /* FULLDEBUG */
-              printf("*** %s not removed; it is read only ***\n", cName);
+              if (output_level >= DEBUG) {
+                printf("*** %s readonly; perms are %d***\n", cName,
+                       pComp->write);
+              }
+              if (output_level >= VERBOSE) {
+                printf("*** %s not removed; it is read only ***\n", cName);
+              }
             }
           } else {
-            printf("*** %s not removed; %s is newer ***\n", cName, tName);
+            if (output_level >= VERBOSE) {
+              printf("*** %s not removed; %s is newer ***\n", cName, tName);
+            }
           }
           break;
         }
@@ -641,9 +645,8 @@ static void examineTree(
    | If some garbage file has not been deleted, list it
   **/
 
-#ifdef FULLDEBUG
-  puts("------------------------------Phase 4: left garbage files");
-#endif   /* FULLDEBUG */
+  putsMessage("------------------------------Phase 4: left garbage files",
+              DEBUG);
 
   pTT = teXTree;
   for (pTT++;  pTT->extension != 0;  pTT++) {
@@ -654,7 +657,9 @@ static void examineTree(
         char cName[FILENAME_MAX];
 
         sprintf(cName, "%s/%s%s", dirName, pComp->name, pTT->extension);
-        printf("*** %s not removed; no .tex file found ***\n", cName);
+        if (output_level >= VERBOSE) {
+          printf("*** %s not removed; no .tex file found ***\n", cName);
+        }
       }
     }
   }
@@ -673,31 +678,26 @@ static void releaseTree(
 
   Froot *pFR;
 
-#ifdef FULLDEBUG
-  puts("------------------------------Phase 5: tree cleanup");
-#endif   /* FULLDEBUG */
+  putsMessage("------------------------------Phase 5: tree cleanup", DEBUG);
 
   for (pFR = teXTree;   pFR->extension != 0;   pFR++) {
     Fnode *pFN, *p;
 
-#ifdef FULLDEBUG
     int nNodes = 0;
-
-    printf("Dealing with extensions %s ...", pFR->extension);
-#endif   /* FULLDEBUG */
+    if (output_level >= DEBUG) {
+      printf("Dealing with extensions %s ...", pFR->extension);
+    }
 
     for (pFN = pFR->firstNode;   pFN != 0;   pFN = p) {
       p = pFN->next;
       free(pFN);
 
-#ifdef FULLDEBUG
       nNodes++;
-#endif   /* FULLDEBUG */
     }
 
-#ifdef FULLDEBUG
-    printf("   %d nodes freed\n", nNodes);
-#endif   /* FULLDEBUG */
+    if (output_level >= DEBUG) {
+      printf("   %d nodes freed\n", nNodes);
+    }
   }
 
   free(teXTree);
@@ -711,9 +711,9 @@ static void nuke(
    | Removes "name" (the fully qualified file name) from the file system
   **/
 
-#if defined(FULLDEBUG) || defined(DEBUG)
-  printf("*** File \"%s\" would have been removed ***\n", name);
-#else
+  if (output_level >= DEBUG) {
+    printf("*** File \"%s\" would have been removed ***\n", name);
+  }
 
   if (confirm) {
     char yn[LONG_ENOUGH], c;
@@ -731,10 +731,11 @@ static void nuke(
     fprintf(stderr, "File \"%s", name);
     perror("\"");
   } else {
-    printf("%s has been removed\n", name);
+    if (output_level >= WHISPER) {
+      printf("%s has been removed\n", name);
+    }
   }
 
-#endif   /* FULLDEBUG or DEBUG */
 }
 
 static char *baseName(
@@ -752,7 +753,7 @@ static char *baseName(
   return ++p;
 }
 
-static void printMessage(
+static void putsMessage(
   char *message,
   int  message_level
 ){
