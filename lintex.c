@@ -122,6 +122,7 @@ typedef struct sFnode {
  | - recurse: will be 0 or 1 according to the -r command option;
  | - keep: will be 0 or 1 according to the -k command option;
  | - output_level: See the definitions above for more details;
+ | - pretend: will be 0 or 1 according to -p command option;
  | - bExt: the extension for backup files: defaults to "~" (the emacs
  |   convention);
  | - n_bExt: the length of the previous string;
@@ -136,6 +137,7 @@ static int     confirm         = FALSE;
 static int     recurse         = FALSE;
 static int     keep            = FALSE;
 static int     output_level    = WHISPER;
+static int     pretend         = FALSE;
 static char    bExt[MAX_B_EXT] = "~";
 static size_t  n_bExt;
 static char   *programName;
@@ -237,6 +239,10 @@ int main(
 
         case 'd':   case 'D':
           output_level = DEBUG;
+          break;
+
+        case 'p':   case 'P':
+          pretend = TRUE;
           break;
 
         default:
@@ -711,8 +717,13 @@ static void nuke(
    | Removes "name" (the fully qualified file name) from the file system
   **/
 
-  if (output_level >= DEBUG) {
+  if ((output_level >= DEBUG) || pretend) {
     printf("*** File \"%s\" would have been removed ***\n", name);
+  }
+
+  if (pretend) {
+    /* We don't need to continue if we aren't going to remove the file */
+    return;
   }
 
   if (confirm) {
@@ -766,7 +777,8 @@ static void syntax()
 {
   printf("lintex version %s\n", VERSION);
   puts("Usage:");
-  printf("  %s [-i] [-r] [-b ext] [-k] [dir [dir ... ]]\n", programName);
+  printf("  %s [-i] [-r] [-b ext] [-p] [-k] [-q] [-v] [-d] [dir [dir"
+         " ... ]]\n", programName);
   puts("Purpose:");
   puts("  removes unneeded TeX auxiliary files and editor backup files from"
        " the");
@@ -782,8 +794,14 @@ static void syntax()
   puts("  -b : \"ext\" is the trailing string identifying editor backup"
        " files");
   puts("       (defaults to \"~\").  -b \"\" avoids any cleanup of special"
-       " files.");
+       " files;");
   puts("  -k : keeps final document (.pdf, .ps, .dvi)");
+  puts("  -p : pretend, show what files would be removed but don't actually");
+  puts("       remove them;");
+  puts("  -k : keeps final document (.pdf, .ps, .dvi);");
+  puts("  -q : quiet, only print error messages;");
+  puts("  -v : verbose, prints which files were removed and which weren't;");
+  puts("  -d : debug output, prints the answers to all of life's questions.");
 
   exit(EXIT_SUCCESS);
 }
