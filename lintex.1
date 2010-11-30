@@ -16,7 +16,7 @@
 lintex \- removes TeX-related garbage files
 .SH SYNOPSIS
 .BR lintex " [ " "\-i" " ] [ " "\-r" " ] [ " "\-b ext" " ] [ " "\-p" " ]"
-.RB " [ " "\-k" " ] [ " "\-q" " ] [ " "\-v" " ] [ " "\-d" " ]"
+.RB " [ " "\-k" " ] [ " "\-o" " ] [ " "\-q" " ] [ " "\-v" " ] [ " "\-d" " ]"
 .RI " [ " dir  " [ " dir " \|.\|.\|.\| ]]"
 .SH DESCRIPTION
 .B lintex
@@ -58,6 +58,9 @@ Pretends, show what files would be removed but don't actually remove them.
 .TP
 .B \-k
 Keeps final documents (.pdf, .ps, .dvi).
+.TP
+.B \-o
+Permits the removal of files older than their sources.
 .TP
 .B \-q
 Quiet, only prints error messages.
