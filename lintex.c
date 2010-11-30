@@ -48,6 +48,9 @@
                         taken care of with command line options now;
                         added a -p (pretend) flag that shows what we would
                         have removed, but doesn't do anything.
+    1.09 - 2010-11-30 , Add support for removing files older than their
+                        source; remove duplicate entry in usage; update
+                        usage to not be wider than 72 characters.
 
   ---------------------------------------------------------------------*/
 
@@ -89,7 +92,7 @@
 #define MAX_B_EXT    8
 #define TRUE         1
 #define FALSE        0
-#define VERSION    "1.08 (2010-10-01)"
+#define VERSION    "1.09 (2010-11-30)"
 #define QUIET        0
 #define WHISPER      1
 #define VERBOSE      2
