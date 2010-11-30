@@ -129,6 +129,7 @@ typedef struct sFnode {
  | - keep: will be 0 or 1 according to the -k command option;
  | - output_level: See the definitions above for more details;
  | - pretend: will be 0 or 1 according to -p command option;
+ | - older: will be 0 or 1 according to -o command option;
  | - bExt: the extension for backup files: defaults to "~" (the emacs
  |   convention);
  | - n_bExt: the length of the previous string;
@@ -144,6 +145,7 @@ static int     recurse         = FALSE;
 static int     keep            = FALSE;
 static int     output_level    = WHISPER;
 static int     pretend         = FALSE;
+static int     older           = FALSE;
 static char    bExt[MAX_B_EXT] = "~";
 static size_t  n_bExt;
 static char   *programName;
@@ -249,6 +251,10 @@ int main(
 
         case 'p':   case 'P':
           pretend = TRUE;
+          break;
+
+        case 'o':   case 'O':
+          older = TRUE;
           break;
 
         default:
@@ -603,7 +609,11 @@ static void examineTree(
           sprintf(cName, "%s/%s%s", dirName, pTeX->name, pTT->extension);
           pComp->name[0] = '\0';
 
-          if (difftime(pComp->mTime, pTeX->mTime) > 0.0) {
+          /**
+           | Remove generated file if more recent than source (default) or if
+           | we permit the removal of files older than source
+          **/
+          if (difftime(pComp->mTime, pTeX->mTime) > 0.0 || older) {
             if (pComp->write == 0) {
               if (keep) {
                 Froot *kExt;
@@ -783,7 +793,7 @@ static void syntax()
 {
   printf("lintex version %s\n", VERSION);
   puts("Usage:");
-  printf("  %s [-i] [-r] [-b ext] [-p] [-k] [-q] [-v] [-d] [dir [dir"
+  printf("  %s [-i] [-r] [-b ext] [-p] [-k] [-o] [-q] [-v] [-d] [dir [dir"
          " ... ]]\n", programName);
   puts("Purpose:");
   puts("  removes unneeded TeX auxiliary files and editor backup files from"
@@ -805,6 +815,7 @@ static void syntax()
   puts("  -p : pretend, show what files would be removed but don't actually");
   puts("       remove them;");
   puts("  -k : keeps final document (.pdf, .ps, .dvi);");
+  puts("  -o : permit removal of files older than their sources;");
   puts("  -q : quiet, only print error messages;");
   puts("  -v : verbose, prints which files were removed and which weren't;");
   puts("  -d : debug output, prints the answers to all of life's questions.");
