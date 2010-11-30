@@ -793,10 +793,9 @@ static void syntax()
 {
   printf("lintex version %s\n", VERSION);
   puts("Usage:");
-  printf("  %s [-i] [-r] [-b ext] [-p] [-k] [-o] [-q] [-v] [-d] [dir [dir"
-         " ... ]]\n", programName);
+  printf("  %s [OPTIONS] [DIR [DIR ...]]\n", programName);
   puts("Purpose:");
-  puts("  removes unneeded TeX auxiliary files and editor backup files from"
+  puts("  Removes unneeded TeX auxiliary files and editor backup files from"
        " the");
   puts("  given directories (default: the current directory); the TeX files"
        " are");
@@ -804,20 +803,20 @@ static void syntax()
        " than");
   puts("  the one of the related TeX source and if they aren't readonly.");
   puts("Options:");
-  puts("  -i : asks the user before removing any file;");
-  puts("  -r : scans recursively the subdirectories of the given"
-       " directories;");
-  puts("  -b : \"ext\" is the trailing string identifying editor backup"
+  puts("  -i     : asks the user before removing any file;");
+  puts("  -r     : scans recursively the subdirectories of the given");
+  puts("           directories;");
+  puts("  -b ext : \"ext\" is the trailing string identifying editor backup"
        " files");
-  puts("       (defaults to \"~\").  -b \"\" avoids any cleanup of special"
-       " files;");
-  puts("  -p : pretend, show what files would be removed but don't actually");
-  puts("       remove them;");
-  puts("  -k : keeps final document (.pdf, .ps, .dvi);");
-  puts("  -o : permit removal of files older than their sources;");
-  puts("  -q : quiet, only print error messages;");
-  puts("  -v : verbose, prints which files were removed and which weren't;");
-  puts("  -d : debug output, prints the answers to all of life's questions.");
+  puts("           (defaults to \"~\").  -b \"\" avoids any cleanup of special");
+  puts("           files;");
+  puts("  -p     : pretend, show what files would be removed but don't actually");
+  puts("           remove them;");
+  puts("  -k     : keeps final document (.pdf, .ps, .dvi);");
+  puts("  -o     : permit removal of files older than their sources;");
+  puts("  -q     : quiet, only print error messages;");
+  puts("  -v     : verbose, prints which files were removed and which weren't;");
+  puts("  -d     : debug output, prints the answers to all of life's questions.");
 
   exit(EXIT_SUCCESS);
 }
