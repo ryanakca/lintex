@@ -811,7 +811,6 @@ static void syntax()
        " files");
   puts("       (defaults to \"~\").  -b \"\" avoids any cleanup of special"
        " files;");
-  puts("  -k : keeps final document (.pdf, .ps, .dvi)");
   puts("  -p : pretend, show what files would be removed but don't actually");
   puts("       remove them;");
   puts("  -k : keeps final document (.pdf, .ps, .dvi);");
