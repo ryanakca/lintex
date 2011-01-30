@@ -810,6 +810,7 @@ static void syntax()
   puts("  actually removed only if their modification time is more recent"
        " than");
   puts("  the one of the related TeX source and if they aren't readonly.");
+  puts("  Please see the manpage for a list of extensions that get removed.");
   puts("Options:");
   puts("  -i     : asks the user before removing any file;");
   puts("  -r     : scans recursively the subdirectories of the given");
