@@ -181,6 +181,7 @@ static Froot protoTree[] = {
   {".thm", 0, 0},
   {".toc", 0, 0},
   {".toc.old", 0, 0},
+  {".synctex.gz", 0, 0},
   {0, 0, 0}                              /* Must be last (sentinel) */
 };
 
