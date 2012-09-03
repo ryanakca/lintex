@@ -79,6 +79,8 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
+#include <libconfig.h>          /* Configuration file support */
+
 /**
  | Definitions:
  | - LONG_ENOUGH: length of the buffer used to read the answer from the
@@ -149,9 +151,14 @@ typedef struct sFnode {
  | - programName: the name of the executable;
  | - protoTree: Froot's of the file names having extensions relevant to
  |   TeX.  ".tex" extensions are assumed to be pointed to by protoTree[0].
- | - keepTree: Froot's of the file names having extensions relevant to final
- |   generated documents.
+ | - keep_exts: Array containing extensions to keep.
+ | - protoTreeSize, keep_exts_size: number of elements in protoTree and
+ |   keep_exts.
 **/
+
+Froot *protoTree;
+char **keep_exts;
+int protoTreeSize;
 
 static int     confirm         = FALSE;
 static int     recurse         = FALSE;
@@ -163,38 +170,36 @@ static char    bExt[MAX_B_EXT] = "~";
 static size_t  n_bExt;
 static char   *programName;
 
-static Froot protoTree[] = {
-  {".tex", 0, 0},                        /* Must be first */
-  {".aux", 0, 0},
-  {".bbl", 0, 0},
-  {".blg", 0, 0},
-  {".dvi", 0, 0},
-  {".idx", 0, 0},
-  {".ilg", 0, 0},
-  {".ind", 0, 0},
-  {".lof", 0, 0},
-  {".log", 0, 0},
-  {".lot", 0, 0},
-  {".nav", 0, 0},
-  {".out", 0, 0},
-  {".out", 0, 0},
-  {".pdf", 0, 0},
-  {".ps",  0, 0},
-  {".snm", 0, 0},
-  {".thm", 0, 0},
-  {".toc", 0, 0},
-  {".toc.old", 0, 0},
-  {".synctex.gz", 0, 0},
-  {".xyc", 0, 0},
-  {0, 0, 0}                              /* Must be last (sentinel) */
+char *remove_exts[] = {
+  ".tex",               /* Must be first */
+  ".aux",
+  ".bbl",
+  ".blg",
+  ".dvi",
+  ".idx",
+  ".ilg",
+  ".ind",
+  ".lof",
+  ".log",
+  ".lot",
+  ".nav",
+  ".out",
+  ".pdf",
+  ".ps",
+  ".snm",
+  ".synctex.gz",
+  ".thm",
+  ".toc",
+  ".toc.old",
+  ".xyc"
 };
 
-static Froot keepTree[] = {
-  {".pdf", 0, 0},
-  {".ps",  0, 0},
-  {".dvi", 0, 0},
-  {0, 0, 0}
+char *keep_exts_defaults[] = {
+  ".pdf",
+  ".ps",
+  ".dvi"
 };
+int keep_exts_size = 3;
 
 /**
  | Procedure prototypes (in alphabetical order)
@@ -210,6 +215,7 @@ static void   nuke(char *);
 static void   putsMessage(char *, int);
 static void   printTree(Froot *);
 static void   releaseTree(Froot *);
+static void   setupTrees(void);
 static void   syntax(void);
 
 /*---------------------------*
@@ -294,6 +300,8 @@ int main(
   }
   n_bExt = strlen(bExt);
 
+  setupTrees();
+
   /**
    | If no parameter has been given, clean the current directory
   **/
@@ -314,6 +322,129 @@ int main(
 /*------------------------------------------*
  | The called procedures (in logical order) |
  *------------------------------------------*/
+
+static void setupTrees(void)
+{
+  /**
+   | Initialise protoTree, keep_exts
+  **/
+  config_t cfg;                 /* To hold our config                    */
+  config_setting_t *setting;    /* To hold a setting                     */
+  int i;                        /* Iterator                              */
+  int needed;                   /* number of characters in filename      */
+  char *extension, *cfg_file;
+
+  if (output_level >= DEBUG)
+    printf("Initialising protoTree, keep_exts.\n");
+
+  protoTreeSize = sizeof(remove_exts) / sizeof(char *) + 1;
+  if ((protoTree = malloc(sizeof(Froot) * protoTreeSize)) == 0) {
+      noMemory();
+  }
+  /* remove_exts has (protoTreeSize - 1) elements */
+  if (output_level >= DEBUG)
+    printf("Created protoTree of size %d\n", protoTreeSize);
+  for (i=0; i < protoTreeSize - 1; i++) {
+    protoTree[i].extension = remove_exts[i];
+    protoTree[i].firstNode = 0;
+    protoTree[i].lastNode = 0;
+    if (output_level >= DEBUG)
+      printf("Added %d-th extension %s to protoTree of size %d at pos %d\n",
+              i, remove_exts[i], protoTreeSize, i);
+  }
+
+  /* Add the sentinel */
+  protoTree[protoTreeSize - 1].extension = 0;
+  protoTree[protoTreeSize - 1].firstNode = 0;
+  protoTree[protoTreeSize - 1].lastNode = 0;
+  if (output_level >= DEBUG)
+    printf("Added sentinal to protoTree at pos %d.\n", protoTreeSize - 1);
+
+  keep_exts = keep_exts_defaults;
+  /**
+   | Initialise and read the config file
+  **/
+
+  config_init(&cfg);
+
+  needed = strlen(getenv("HOME")) + strlen("/.lintexrc") + 1;
+  cfg_file = (char *) malloc(sizeof(char) * needed);
+  if (getenv("HOME")) {
+    strcpy(cfg_file, getenv("HOME"));
+    strcat(cfg_file, "/.lintexrc");
+    if (output_level >= DEBUG)
+      printf("Using config file %s.\n", cfg_file);
+  }
+
+  if (! access(cfg_file, R_OK)) {
+    /* We have read access to the config file */
+    if (! config_read_file(&cfg, cfg_file)) {
+      fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg),
+              config_error_line(&cfg), config_error_text(&cfg));
+      config_destroy(&cfg);
+      exit(EXIT_FAILURE);
+    }
+
+    /* Lets extract our settings */
+    /* Extensions to remove */
+    setting = config_lookup(&cfg, "remove-exts");
+    if (setting != NULL) {
+      unsigned int count = config_setting_length(setting);
+
+      Froot *protoTreeTemp;
+      if ((protoTreeTemp = (Froot *) malloc(sizeof(Froot) * (count + protoTreeSize))) == 0) {
+        noMemory();
+      }
+      memcpy(protoTreeTemp, protoTree, sizeof(Froot) * protoTreeSize);
+      if (output_level >= DEBUG)
+        printf("Copied protoTree to larger location to add config exts.\n");
+
+      for (i = 0; i < count; i++) {
+        extension = (char *) config_setting_get_string_elem(setting, i);
+        protoTreeTemp[protoTreeSize - 1 + i].extension = extension;
+        protoTreeTemp[protoTreeSize - 1 + i].firstNode = 0;
+        protoTreeTemp[protoTreeSize - 1 + i].lastNode = 0;
+        if (output_level >= DEBUG)
+          printf("Added %d-th config extension %s to protoTree of size %d at pos %d\n",
+                i, extension, protoTreeSize + count, protoTreeSize - 1 + i);
+      }
+
+      /* Add the sentinel */
+      protoTreeTemp[protoTreeSize - 1 + count].extension = 0;
+      protoTreeTemp[protoTreeSize - 1 + count].firstNode = 0;
+      protoTreeTemp[protoTreeSize - 1 + count].lastNode = 0;
+      protoTree = protoTreeTemp;
+      if (output_level >= DEBUG)
+        printf("Added sentinel to protoTree at position %d\n", protoTreeSize - 1 + count);
+
+      protoTreeSize += count;
+    }
+
+    /* Extensions to keep */
+    setting = config_lookup(&cfg, "keep-exts");
+    if (setting != NULL) {
+      int i;
+      keep_exts_size = config_setting_length(setting);
+
+      if ((keep_exts = (char **) malloc(sizeof(char *) * keep_exts_size)) == 0) {
+        noMemory();
+      }
+
+      for (i = 0; i < keep_exts_size; i++) {
+        keep_exts[i] = (char *) config_setting_get_string_elem(setting, i);
+        if (output_level >= DEBUG)
+          printf("Added %d-th config extension %s to keep_exts of size %d at pos %d\n",
+                i, keep_exts[i], keep_exts_size, i);
+      }
+    }
+  } else {
+    if (! access(cfg_file, F_OK)) {
+      /* File exists */
+      fprintf(stderr,
+        "Warning: Insufficient permissions to read config file $HOME/.lintexrc");
+    }
+  }
+}
 
 static void insertNode(
   char   *name,
@@ -435,10 +566,10 @@ static Froot *buildTree(
     return 0;
   }
 
-  if ((teXTree = malloc(sizeof(protoTree))) == 0) {
+  if ((teXTree = malloc(protoTreeSize * sizeof(Froot))) == 0) {
     noMemory();
   }
-  memcpy(teXTree, protoTree, sizeof(protoTree));
+  memcpy(teXTree, protoTree, protoTreeSize * sizeof(Froot));
 
   while ((pDe = readdir(pDir)) != 0) {
     char    tName[FILENAME_MAX];         /* Fully qualified file name       */
@@ -524,10 +655,37 @@ static Froot *buildTree(
 
         for (pTT = teXTree;   pTT->extension != 0;   pTT++) {
           if (strcmp(pFe, pTT->extension) == 0) {
-            insertNode(pDe->d_name, nameLen, sStat.st_mtime, access(tName, W_OK), pTT);
+            int i;
+            if (keep) {
+              i = 0;
+            } else {
+              i = keep_exts_size;
+            }
+            for (i = 0; i < keep_exts_size; i++) {
+              if (strcmp(pFe, keep_exts[i]) == 0) {
+                /**
+                 | The current file's extension is in keep_exts, we want to keep
+                 | it.
+                **/
+                i = -1;
+                break;
+              }
+            }
 
-            if (output_level >= DEBUG) {
-              printf(" - inserted in tree");
+            if ((!keep) | (i != -1)) {
+              /**
+               | Only add the file if we didn't find its extension in keep_exts
+              **/
+              insertNode(pDe->d_name, nameLen, sStat.st_mtime, access(tName, W_OK), pTT);
+              if (output_level >= DEBUG) {
+                printf(" - inserted in tree");
+              }
+            } else if (keep) {
+              if (output_level >= DEBUG) {
+                printf(" - not inserted in tree (extension in keep-exts)");
+              } else if (output_level >= VERBOSE) {
+                printf("*** %s not removed; keep activated ***\n", pDe->d_name);
+              }
             }
             break;
           }
@@ -633,34 +791,7 @@ static void examineTree(
           **/
           if (difftime(pComp->mTime, pTeX->mTime) > 0.0 || older) {
             if (pComp->write == 0) {
-              if (keep) {
-                Froot *kExt;
-                /**
-                 | Loop on recognized TeX-related document extensions
-                 | to make sure we aren't deleting a document we want
-                 | to keep.
-                 |
-                 | Surely there's a more elegant way?
-                **/
-                int guard = 1;
-                for (kExt = keepTree; kExt->extension != 0; kExt++) {
-                  if ((strcmp(kExt->extension, pTT->extension) == 0)) {
-                    guard = 0;
-                    break;
-                  }
-                }
-                if (guard) {
-                  /**
-                   | This is not a final TeX document. We can delete it
-                  **/
-                  nuke(cName);
-                } else {
-                  printf("*** %s not removed; keep is enabled ***\n", cName);
-                }
-              } else {
-                /* We don't care to keep final documents */
-                nuke(cName);
-              }
+              nuke(cName);
             } else {
               if (output_level >= DEBUG) {
                 printf("*** %s readonly; perms are %d***\n", cName,

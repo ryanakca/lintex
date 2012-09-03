@@ -1,8 +1,8 @@
 # $Id: Makefile,v 1.3 2001/12/02 11:00:05 loreti Exp $
 
 CC = gcc
-CFLAGS = -ansi -pedantic -Wall -O3
-#CFLAGS = -ansi -pedantic -Wall -O -DFULLDEBUG
+CFLAGS = -ansi -pedantic -Wall -O3 `pkg-config --libs --cflags libconfig`
+#CFLAGS = -ansi -Wall -g `pkg-config --libs --cflags libconfig`
 
 ROOT = /usr/local
 
