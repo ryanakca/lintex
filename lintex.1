@@ -81,11 +81,36 @@ All files ending in the following extensions may be removed when appropriate:
 
    .aux, .bbl, .blg, .dvi, .idx, .ilg, .ind, .lof, .log, .lot, .nav, .out,\
  .pdf, .ps, .snm, .thm, .toc, .toc.old, .synctex.gz, .xyc
+.SH ENVIRONMENT
+The \fBHOME\fP environment variable determines the location of the configuration
+file, see \fBFILES\fP below.
+.SH FILES
+Users can create a configuration file \fI$HOME/.lintexrc\fP which optionally
+contains the keys \fBremove-keys\fP and \fBkeep-keys\fP, each followed by a
+Python style list of extensions to additionally remove or keep, respectively.
+Each extension \fImust\fP be preceeded by a period, e.g. ".pdf" and not "pdf".
+The \fBkeep-keys\fP key is only used when the keep option (\fB\-k\fP) is passed.
+Note that the extensions listed in the \fBkeep-keys\fP field replace the
+defaults used by the \fB\-k\fP option. The \fBkeep-keys\fP option also takes
+precedence over \fBremove-keys\fP: no file ending in an extension removed by
+default or listed in \fBremove-keys\fP will be deleted if its extension is
+listed in \fBkeep-keys\fP and the \fB\-k\fP option was passed. For example, the
+configuration file
 
+    keep-keys = [".pdf", ".ps", ".log"];
+    remove-keys = [".txt", ".1"];
+
+will keep any file ending in ".pdf", ".ps" or ".log" when lintex is called with
+the \fP\-k\fP option (but \fInot\fP files ending in ".dvi"), and adds ".txt" and
+".1" to the list of extensions to check for removal. The following configuration
+file provides lintex with its default behaviour:
+
+    keep-keys = [".pdf", ".ps", ".dvi"];
+    remove-keys = [];
 .SH AUTHOR
 lintex was written by Maurizio Loreti <Maurizio_Loreti\@gmail.com> between 1996
 and 2002.
-
+.LP
 As of 2010, lintex is maintained by Ryan Kavanagh <rak\@debian.org>. It
 features several extensions/bug fixes. Feel free to email him with your comments
 and suggestions.
