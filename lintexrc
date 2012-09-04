@@ -1,0 +1,2 @@
+keep-exts = [".pdf", ".ps", ".dvi"];
+remove-exts = [".glo", ".gls"];
