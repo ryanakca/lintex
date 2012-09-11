@@ -70,11 +70,8 @@
                         removal extensions in manpage.
     1.11 - 2011-11-07 , Also remove .synctex.gz files.
     1.12 - 2012-08-30 , Also remove xypic's .xyc files.
-
-  TODO: It would be nice to have a config file where users can specify
-    extensions they'd like to have removed. Default options could also
-    be included. This would avoid having to release a new version every
-    time we add a file to be removed.
+    1.13 - 2012-09-11 , Add support for configuration file; updated
+                        documentation.
 
   ---------------------------------------------------------------------*/
 
@@ -118,7 +115,7 @@
 #define MAX_B_EXT    8
 #define TRUE         1
 #define FALSE        0
-#define VERSION    "1.12 (2012-08-30)"
+#define VERSION    "1.13 (2012-09-11)"
 #define QUIET        0
 #define WHISPER      1
 #define VERBOSE      2
