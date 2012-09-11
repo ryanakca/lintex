@@ -1,17 +1,31 @@
-/*------------------------------------------------------*
- | Author: Maurizio Loreti, aka MLO or (HAM) I3NOO      |
- | Work:   University of Padova - Department of Physics |
- |         Via F. Marzolo, 8 - 35131 PADOVA - Italy     |
- | Phone:  ++39(49) 827-7216     FAX: ++39(49) 827-7102 |
- | EMail:  loreti@padova.infn.it                        |
- | WWW:    http://wwwcdf.pd.infn.it/~loreti/mlo.html    |
- *------------------------------------------------------*
+/*
+  Copyright (C) 2010-2012 Ryan Kavanagh <rak@debian.org>
+  Copyright (C) 1996–2002 Maurizio Loreti:
+      *------------------------------------------------------*
+      | Author: Maurizio Loreti, aka MLO or (HAM) I3NOO      |
+      | Work:   University of Padova - Department of Physics |
+      |         Via F. Marzolo, 8 - 35131 PADOVA - Italy     |
+      | Phone:  ++39(49) 827-7216     FAX: ++39(49) 827-7102 |
+      | EMail:  loreti@padova.infn.it                        |
+      | WWW:    http://wwwcdf.pd.infn.it/~loreti/mlo.html    |
+      *------------------------------------------------------*
 
- Copyright (C) 2010-2012 Ryan Kavanagh <rak@debian.org>
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
- The lintex website now resides at:
-   http://github.com/ryanakca/lintex
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
+  You should have received a copy of the GNU General Public License along
+  with this program; if not, write to the Free Software Foundation, Inc.,
+  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+  The lintex website now resides at:
+    http://github.com/ryanakca/lintex
 
   Description: the command "lintex [-i] [-r] [dir1 [dir2 ...]]" scans
     the directories given as parameters (the default is the current
