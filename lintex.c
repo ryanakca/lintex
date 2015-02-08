@@ -185,6 +185,7 @@ char *remove_exts[] = {
   ".tex",               /* Must be first */
   ".aux",
   ".bbl",
+  ".bcf",
   ".blg",
   ".dvi",
   ".idx",
