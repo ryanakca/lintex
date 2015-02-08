@@ -107,6 +107,11 @@ file provides lintex with its default behaviour:
 
     keep-exts = [".pdf", ".ps", ".dvi"];
     remove-exts = [];
+.SH BUGS
+lintex cannot handle extensions containing periods, for example, ".toc.old" and
+".synctex.gz", since it splits filenames at the last period to find the
+extension, treating "foo.toc.old" as the file "foo.toc" with the extension
+".old".
 .SH AUTHOR
 lintex was written by Maurizio Loreti <Maurizio_Loreti\@gmail.com> between 1996
 and 2002.
