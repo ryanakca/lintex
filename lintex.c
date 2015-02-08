@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2010-2012 Ryan Kavanagh <rak@debian.org>
+  Copyright (C) 2010-2015 Ryan Kavanagh <rak@debian.org>
   Copyright (C) 1996–2002 Maurizio Loreti:
       *------------------------------------------------------*
       | Author: Maurizio Loreti, aka MLO or (HAM) I3NOO      |
@@ -72,6 +72,11 @@
     1.12 - 2012-08-30 , Also remove xypic's .xyc files.
     1.13 - 2012-09-11 , Add support for configuration file; updated
                         documentation.
+    1.14 - 2015-02-08 , Fix typos in manpage
+                        Move libraries to link with from CFLAGS to LIBS
+                        Also remove .bcf
+                        Discuss shortcomings for extension processing in
+                        manpage.
 
   ---------------------------------------------------------------------*/
 
@@ -115,7 +120,7 @@
 #define MAX_B_EXT    8
 #define TRUE         1
 #define FALSE        0
-#define VERSION    "1.13 (2012-09-11)"
+#define VERSION    "1.14 (2015-02-08)"
 #define QUIET        0
 #define WHISPER      1
 #define VERBOSE      2
