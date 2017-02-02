@@ -375,7 +375,7 @@ static void setupTrees(void)
   protoTree[protoTreeSize - 1].firstNode = 0;
   protoTree[protoTreeSize - 1].lastNode = 0;
   if (output_level >= DEBUG)
-    printf("Added sentinal to protoTree at pos %d.\n", protoTreeSize - 1);
+    printf("Added sentinel to protoTree at pos %d.\n", protoTreeSize - 1);
 
   keep_exts = keep_exts_defaults;
   /**
